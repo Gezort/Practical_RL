@@ -1,5 +1,6 @@
 ## Materials
 * [__Lecture slides__](https://docviewer.yandex.ru/?url=ya-disk-public%3A%2F%2FG3IXcG62RwNUGSSos%2BuGhtgXNfsBjP9RxUtUfgCffIk%3D%3A%2Flecture2.pdf&name=lecture2.pdf&c=58a61e22b9fb)
+* Our [lecture](https://yadi.sk/i/cVawsPkK3EtGJj),[seminar](https://yadi.sk/i/dQmolwOy3EtGNK) (russian)
 * Similar lecture by David Silver (english): https://www.youtube.com/watch?v=PnHCvfgC_ZA
 * Similar lecture by Pieter Abbeel (english): https://www.youtube.com/watch?v=ifma8G7LegE
 
@@ -42,6 +43,7 @@ Please read tips on how to solve them [__here__](https://github.com/yandexdatasc
 * The alternative qlearningAgents.py file (and any other files you modified)
 * A short description of what you did there
 * How to run it. Usually something like `python pacman.py -p PacmanQAgent -x SOMETHING -n SOMETHING -l __mediumClassic__ -SOMETHING SOMETHING ...`
+* End of train/test log (or even whole log), including at least last iteration of learning and final statistics (especially winrate)
 
 To get 5 points, your algorithm should solve __mediumGrid__ more than 50% times. Creative features and outstanding performance on __mediumClassic__ yields bonus points!
  
