@@ -1,5 +1,5 @@
 *videos
-*xvfb*
+*xvfb.pid
 
 # node and NPM
 npm-debug.log
