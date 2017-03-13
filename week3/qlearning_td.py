@@ -1,48 +1,52 @@
 """
-Expected Value SARSA
-This file builds upon the same functions as Q-learning agent (qlearning.py).
+Q-learning
+This file contains the same q-learning agent you implemented in the previous assignment.
+The only difference is that it doesn't need any other files with it, so you can use it as a standalone moule.
 
-[assignment]
-The only thing you must implement is the getValue method.
-- Recall that V(s) in SARSA is not the maximal but the expected Q-value.
-- The expectation should be done under agent's policy (e-greedy).
+Here's an example:
+>>>from qlearning import QLearningAgent
 
-
-Here's usage example:
->>>from sarsa import SarsaAgent
-
->>>agent = SarsaAgent(alpha=0.1,epsilon=0.25,discount=0.99,
+>>>agent = QLearningAgent(alpha=0.5,epsilon=0.25,discount=0.99,
                        getLegalActions = lambda s: actions_from_that_state)
 >>>action = agent.getAction(state)
 >>>agent.update(state,action, next_state,reward)
 >>>agent.epsilon *= 0.99
 """
+
 import random,math
 
 import numpy as np
 from collections import defaultdict
 
-class SarsaAgent():
+class QLearningTDAgent():
   """
-    Classical SARSA agent.
-    
+    Q-Learning Agent
+
     The two main methods are 
     - self.getAction(state) - returns agent's action in that state
-    - self.update(state,action,reward,nextState,nextAction) - returns agent's next action
+    - self.update(state,action,nextState,reward) - returns agent's next action
 
-    Instance variables you have access to
-      - self.epsilon (exploration prob)
-      - self.alpha (learning rate)
-      - self.discount (discount rate aka gamma)
-
+    Functions you should use
+      - self.getLegalActions(state)
+        which returns legal actions for a state
+      - self.getQValue(state,action)
+        which returns Q(state,action)
+      - self.setQValue(state,action,value)
+        which sets Q(state,action) := value
+    
+    !!!Important!!!
+    NOTE: please avoid using self._qValues directly to make code cleaner
   """
-  def __init__(self,alpha,epsilon,discount,getLegalActions):
+  def __init__(self,alpha,epsilon,discount,lambd,getLegalActions,el_trace_threshold=0.2):
     "We initialize agent and Q-values here."
     self.getLegalActions= getLegalActions
     self._qValues = defaultdict(lambda:defaultdict(lambda:0))
     self.alpha = alpha
     self.epsilon = epsilon
     self.discount = discount
+    self.lambd = lambd
+    self.el_trace_threshold = el_trace_threshold
+    self.e = {}
 
   def getQValue(self, state, action):
     """
@@ -58,6 +62,20 @@ class SarsaAgent():
 
 #---------------------#start of your code#---------------------#
 
+  def getValue(self, state):
+    """
+      Returns max_action Q(state,action)
+      where the max is over legal actions.
+    """
+    
+    possibleActions = self.getLegalActions(state)
+    #If there are no legal actions, return 0.0
+    if len(possibleActions) == 0:
+        return 0.0
+
+    "*** YOUR CODE HERE ***"
+    return max([self.getQValue(state, a) for a in possibleActions])
+    
   def getPolicy(self, state):
     """
       Compute the best action to take in a state. 
@@ -67,11 +85,10 @@ class SarsaAgent():
 
     #If there are no legal actions, return None
     if len(possibleActions) == 0:
-    	return None
+        return None
     
     best_action = None
 
-    "*** this code works exactly as Q-learning ***"
     best_action = possibleActions[np.argmax([self.getQValue(state, a) for a in possibleActions])]
     return best_action
 
@@ -93,19 +110,18 @@ class SarsaAgent():
     
     #If there are no legal actions, return None
     if len(possibleActions) == 0:
-    	return None
+        return None
 
     #agent parameters:
     epsilon = self.epsilon
 
-    "*** Epsilon-greedy strategy exactly as Q-learning ***"
     if np.random.random()<=epsilon:
-    	return random.choice(possibleActions)
+        return random.choice(possibleActions)
     else:
-    	action = self.getPolicy(state)
+        action = self.getPolicy(state)
     return action
 
-  def update(self, state, action, nextState,nextAction, reward):
+  def update(self, state, action, nextState, reward):
     """
       You should do your Q-Value update here
 
@@ -117,14 +133,21 @@ class SarsaAgent():
     #agent parameters
     gamma = self.discount
     learning_rate = self.alpha
-    
-    reference_qvalue = reward + gamma * self.getQValue(nextState, nextAction)
-    
-    updated_qvalue = (1-learning_rate) * self.getQValue(state,action) + learning_rate * reference_qvalue
-    
-    self.setQValue(state,action,updated_qvalue)
+    lambd = self.lambd
+    el_trace = self.e.get((state, action), 0) + 1
+    self.e[(state, action)] = el_trace
+    keys = list(self.e.keys())
 
-
+    for s,a in keys:
+        el_trace = self.e[(s,a)]
+        lr = learning_rate * el_trace
+        reference_qvalue = reward + gamma * self.getValue(nextState)
+        updated_qvalue = (1-lr) * self.getQValue(state, action) + lr * reference_qvalue
+        self.setQValue(state,action,updated_qvalue)
+        if el_trace * lambd * gamma > self.el_trace_threshold:
+            self.e[(s,a)] = el_trace * lambd * gamma
+        else:
+            self.e.pop((s,a))
 #---------------------#end of your code#---------------------#
 
 
