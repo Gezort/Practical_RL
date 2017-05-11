@@ -1,3 +1,6 @@
+*.csv
+*.tsv
+
 *videos
 *xvfb.pid
 
