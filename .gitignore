@@ -1,6 +1,7 @@
 */records
 *.csv
 *.tsv
+*.pcl
 
 *videos
 *xvfb.pid
